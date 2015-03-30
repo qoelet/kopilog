@@ -1,53 +1,70 @@
+/* before you hit the coffeeshops, ask Kopilog! */
 
   isADrink(coffee).
   isADrink(tea).
   isADrink(milo).
+  isADrink(horlicks).
+ 
+  /* mods */
+  sugar(less).
+  sugar(more).
+  sugar(none).
+  sugar(normal).
+  milk(evaporated).
+  milk(condensed).
+  temperature(hot).
+  temperature(cold).
+  dilution_factor(high).
+  dilution_factor(low).
+  dilution_factor(normal).
 
-  isAModifier(less_sugar).
-  isAModifier(more_sugar).
-  isAModifier(with_evaporated_milk).
-  isAModifier(no_sugar).
-  isAModifier(concentrated).
-  isAModifier(diluted).
-  isAModifier(cold).
-
-  areModifiers([], []).
-  areModifiers([H|T], [H|L]) :- isAModifier(H), areModifiers(T, L).
-
+  /* rough translations */
   translate(coffee, kopi).
   translate(tea, teh).
-  translate(less_sugar, siudai).
-  translate(more_sugar, kadai).
-  translate(no_sugar, kosong).
-  translate(with_evaporated_milk, si).
-  translate(concentrated, gao).
-  translate(diluted, po).
-  translate(cold, peng).
+  translate(milo, takkiu).
+  translate(horlicks, daikahou).
+  translate(sugar(less), siudai).
+  translate(sugar(more), kadai).
+  translate(sugar(none), kosong).
+  translate(sugar(normal), '').
+  translate(milk(evaporated), si).
+  translate(milk(condensed), '').
+  translate(dilution_factor(low), gao).
+  translate(dilution_factor(high), po).
+  translate(dilution_factor(normal), '').
+  translate(temperature(cold), peng).
+  translate(temperature(hot), sio).
 
-  mapTranslate([], []).
-  mapTranslate([H|T], [Ht|L]) :- translate(H, Ht), mapTranslate(T, L).
+  writeTranslated(D, M, F, S, T) :-
+    translate(D, Dt),
+    translate(milk(M), Mt),
+    translate(dilution_factor(F), Ft),
+    translate(sugar(S), St),
+    translate(temperature(T), Tt),
+    /* side effects */
+    writeWithSpaces([Dt, Mt, Ft, St, Tt]).
 
-  list_to_string(L,S):- string_to_list(S,L).
+  writeWithSpaces([]) :- nl.
+  writeWithSpaces([''|T]) :- writeWithSpaces(T).
+  writeWithSpaces([H|T]) :-
+    write(H),
+    write(' '),
+    writeWithSpaces(T).
 
-  order(X, Y, O) :-
-    isADrink(X),
-    isAModifier(Y),
-    translate(X, Xt),
-    translate(Y, Yt),
-
-    write(Xt), write(' '), write(Yt), nl.
-
-  order(X, Yl, O) :-
-    isADrink(X),
-    areModifiers(Yl, Ym),
-    translate(X, Xt),
-    mapTranslate(Yl, Yt),
-
-    write(Xt), write(' '), write(Yt), nl.
+  /* we want to write out the translated term with the right positional order */
+  order(D, sugar(S), milk(M), temperature(T), dilution_factor(F)) :-
+    isADrink(D),
+    writeTranslated(D, M, F, S, T).
 
 /*
-?- order(coffee, [concentrated, less_sugar, with_evaporated_milk, cold], O).
-kopi [gao,siudai,si,peng]
-?- translate(X, siudai).
-X = less_sugar.
+?- order(tea, sugar(less), milk(condensed), temperature(cold), dilution_factor(low)).
+teh gao siudai peng
+true .
+
+?- order(coffee, sugar(none), milk(condensed), temperature(hot), dilution_factor(low)).
+kopi gao kosong sio
+true .
+
+?- translate(sugar(none), S).
+S = kosong.
 */

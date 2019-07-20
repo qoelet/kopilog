@@ -1,10 +1,11 @@
 /* before you hit the coffeeshops, ask Kopilog! */
 
+  isADrink(espresso).
   isADrink(coffee).
   isADrink(tea).
   isADrink(milo).
   isADrink(horlicks).
- 
+
   /* mods */
   sugar(less).
   sugar(more).
@@ -19,6 +20,7 @@
   dilution_factor(normal).
 
   /* rough translations */
+  translate(espresso, tilok).
   translate(coffee, kopi).
   translate(tea, teh).
   translate(milo, takkiu).
@@ -52,11 +54,19 @@
     writeWithSpaces(T).
 
   /* we want to write out the translated term with the right positional order */
+  order(espresso, sugar(none), milk(none), temperature(hot), dilution_factor(none)) :-
+    translate(espresso, X),
+    writeWithSpaces([X]), !.
   order(D, sugar(S), milk(M), temperature(T), dilution_factor(F)) :-
+    D \= espresso,
     isADrink(D),
-    writeTranslated(D, M, F, S, T).
+    writeTranslated(D, M, F, S, T), !.
 
 /*
+$ swipl
+?- [kopilog].
+true.
+
 ?- order(tea, sugar(less), milk(condensed), temperature(cold), dilution_factor(low)).
 teh gao siudai peng
 true .
